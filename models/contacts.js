@@ -29,7 +29,13 @@ const contactSchema = new mongoose.Schema(
       required: [true],
       default: false,
     },
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
+
   { versionKey: false }
 );
 
