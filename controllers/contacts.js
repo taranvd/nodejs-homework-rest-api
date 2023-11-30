@@ -17,9 +17,9 @@ const getContactById = async (req, res, next) => {
   const { contactId } = req.params;
   const contact = await Contacts.findById(contactId);
 
-  if (!contact) {
-    return next();
-  }
+  // if (contact.owner.toString() !== req.user.id) next();
+
+  if (!contact) return next();
 
   res.send(contact);
 };
