@@ -27,7 +27,6 @@ async function register(req, res, next) {
     email,
     password: passwordHash,
     avatarUrl,
-    test: 123,
   });
 
   res.status(201).send({
