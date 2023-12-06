@@ -27,4 +27,10 @@ const updateAvatar = Joi.object({
   }),
 });
 
-module.exports = { registerSchemas, loginSchemas, updateAvatar };
+const verifyEmail = Joi.object({
+  email: Joi.string().required().messages({
+    "any.required": "missing required field email",
+  }),
+});
+
+module.exports = { registerSchemas, loginSchemas, updateAvatar, verifyEmail };
