@@ -7,7 +7,7 @@ const gravatar = require("gravatar");
 const User = require("../models/users");
 const { HttpError, ctrlWrap, sendMail } = require("../helpers");
 
-const { SECRET_KEY } = process.env;
+const { SECRET_KEY, BASE_URL } = process.env;
 
 const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 
@@ -27,8 +27,8 @@ async function register(req, res, next) {
   await sendMail({
     to: email,
     subject: "Сonfirm registration",
-    html: `to confirm your registration please click on the <a href='http://localhost:3000/api/users/verify/${verifyToken}'>link</a>`,
-    text: `to confirm your registration please open the link http://localhost:3000/api/users/verify/${verifyToken}`,
+    html: `to confirm your registration please click on the <a href='${BASE_URL}/api/users/verify/${verifyToken}'>link</a>`,
+    text: `to confirm your registration please open the link ${BASE_URL}/api/users/verify/${verifyToken}`,
   });
 
   const { email: userEmail, subscription } = await User.create({
@@ -134,17 +134,21 @@ async function verify(req, res) {
 async function verifyEmail(req, res) {
   const { email } = req.body;
 
-  const { verifyToken, verify } = await User.findOne({ email });
+  const user = await User.findOne({ email });
 
-  if (verify === true) {
+  if (!user) {
+    throw HttpError(401, "Email not foud");
+  }
+
+  if (user.verify === true) {
     throw HttpError(400, "Verification has already been passed");
   }
 
   await sendMail({
     to: email,
     subject: "Сonfirm registration",
-    html: `to confirm your registration please click on the <a href='http://localhost:3000/api/users/verify/${verifyToken}'>link</a>`,
-    text: `to confirm your registration please open the link http://localhost:3000/api/users/verify/${verifyToken}`,
+    html: `to confirm your registration please click on the <a href='http://localhost:3000/api/users/verify/${user.verifyToken}'>link</a>`,
+    text: `to confirm your registration please open the link http://localhost:3000/api/users/verify/${user.verifyToken}`,
   });
 
   res.status(200).send({
