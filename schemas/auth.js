@@ -20,4 +20,11 @@ const loginSchemas = Joi.object({
   }),
 });
 
-module.exports = { registerSchemas, loginSchemas };
+const updateAvatar = Joi.object({
+  avatar: Joi.string().required().empty("").messages({
+    "string.empty": "Please upload an avatar image.",
+    "any.required": "Please upload an avatar image.",
+  }),
+});
+
+module.exports = { registerSchemas, loginSchemas, updateAvatar };
