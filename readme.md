@@ -27,3 +27,35 @@ This is an API for a contacts book that allows managing contacts.
 - Start server in development mode: `npm run start:dev`
 - Run ESLint for code check (execute before each PR and fix all lint errors): `npm run lint`
 - Run ESLint with automatic fixes for simple errors: `npm run lint:fix`
+
+## Routes
+
+### User Authentication Routes (`/api/users`):
+
+- **POST `/register`:** User registration. Validates the request body against the specified schema and calls `AuthController.register`.
+
+- **POST `/login`:** User login. Validates the request body against the specified schema and calls `AuthController.login`.
+
+- **GET `/current`:** Get current user's information. Protected by the `authenticate` middleware.
+
+- **POST `/logout`:** User logout. Protected by the `authenticate` middleware.
+
+- **PATCH `/avatars`:** Update user's avatar. Protected by the `authenticate` middleware and expects a file upload using `multer`.
+
+- **GET `/verify/:token`:** Verify user account by providing the verification token.
+
+- **POST `/verify`:** Request email verification. Validates the request body against the specified schema.
+
+### Contacts Routes (`/api/contacts`):
+
+- **GET `/`:** Get the list of contacts. Protected by the `authenticate` middleware.
+
+- **GET `/:contactId`:** Get a specific contact by ID. Protected by the `authenticate` middleware, validates the contact ID, and checks if the authenticated user is the owner.
+
+- **POST `/`:** Add a new contact. Protected by the `authenticate` middleware, validates the request body.
+
+- **PATCH `/:contactId/favorite`:** Update the favorite status of a contact. Protected by the `authenticate` middleware, validates the contact ID, and checks if the authenticated user is the owner.
+
+- **DELETE `/:contactId`:** Remove a contact by ID. Validates the contact ID.
+
+- **PUT `/:contactId`:** Update a contact by ID. Protected by the `authenticate` middleware, validates the contact ID, and checks if the authenticated user is the owner.
