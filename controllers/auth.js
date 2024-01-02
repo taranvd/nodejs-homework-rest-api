@@ -59,9 +59,9 @@ async function login(req, res, next) {
     throw HttpError(401, "Email or password is wrong");
   }
 
-  if (user.verify !== true) {
-    throw HttpError(401, "Your account is not verify");
-  }
+  // if (user.verify !== true) {
+  //   throw HttpError(401, "Your account is not verify");
+  // }
 
   const payload = {
     id: user._id,
@@ -99,7 +99,9 @@ async function logout(req, res, next) {
 
   await User.findByIdAndUpdate(_id, { token: "" });
 
-  res.status(204).end();
+  res.status(204).send({
+    message: "Logout success",
+  });
 }
 
 async function updateAvatar(req, res) {

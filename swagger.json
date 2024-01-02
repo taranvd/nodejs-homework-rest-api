@@ -1,0 +1,729 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "version": "1.0.1",
+    "title": "Contacts",
+    "description": "API documentation for project",
+    "contact": {
+      "email": "apple.vlad.taran@gmail.com"
+    }
+  },
+  "consumes": ["application/json", "multipart/form-data"],
+  "produces": ["application/json", "multipart/form-data"],
+  "servers": [{ "url": "http://localhost:3000" }],
+  "tags": [
+    { "name": "Auth", "description": "Authorization endpoints" },
+    { "name": "User", "description": "User endpoints" },
+    { "name": "Contacts", "description": "Contacts endpoints" }
+  ],
+  "paths": {
+    "/api/users/register": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User registration",
+        "requestBody": {
+          "required": true,
+          "description": "Description of request parameters: \n\n**email** - string, User`s email,\n\n**password** - string, User`s password,\n\n",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Register"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Created session for an existing user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserRegistration"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequestResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Email already in use",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorRemoveCategoryResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/login": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User logged in",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "description": "Description of request parameters:\n\n**email** - string, User`s email,\n\n**password** - string, User`s password.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Return the token to the user who logged in",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithTokenSerializer"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Email or password is wrong",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUnauthorizedResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/logout": {
+      "post": {
+        "tags": ["Auth"],
+        "summary": "User logged out",
+        "parameters": [],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "204": {
+            "description": "Logout success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignOutUser"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/current": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Receiving user data",
+        "parameters": [],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Data for the current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SendingUserData"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotfound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/user/avatars": {
+      "patch": {
+        "tags": ["User"],
+        "summary": "Upload a new avatar. Here you can replace the avatar you received when you registered with your own, or add a photo.",
+        "parameters": [],
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "Description of request parameters:\n\n**avatar** - string, User`s photo.",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeAvatar"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sending a new avatar",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewAvatar"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorNotfound"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/contacts": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "List all contacts",
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "List of contacts",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Contact" }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Contacts"],
+        "summary": "Add a new contact",
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "Contact details",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Contact" }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Contact created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Contact"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/contacts/{contactId}": {
+      "get": {
+        "tags": ["Contacts"],
+        "summary": "Get a specific contact by ID",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID of the contact",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Contact details",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Contact" }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorNotfound" }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": ["Contacts"],
+        "summary": "Update a specific contact by ID",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID of the contact",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "Updated contact details",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/Contact" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Contact updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Contact" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorNotfound" }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Contacts"],
+        "summary": "Delete a specific contact by ID",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID of the contact",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Contact deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Contact" }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorNotfound" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/contacts/{contactId}/favorite": {
+      "patch": {
+        "tags": ["Contacts"],
+        "summary": "Update the favorite status of a specific contact by ID",
+        "parameters": [
+          {
+            "name": "contactId",
+            "in": "path",
+            "description": "ID of the contact",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "requestBody": {
+          "required": true,
+          "description": "Updated favorite status",
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ContactFavorite" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Favorite status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Contact" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request (validation error)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorBadRequestResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token has expired",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/errorUserTokenExpiredResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/errorNotfound" }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "Bearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "Register": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "pattern": "^\\w+([.-]?\\w+)*@\\w+([.-]?\\w+)*(\\.\\w{2,3})+$",
+            "example": "jacob@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "jac123"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "pattern": "^\\w+([.-]?\\w+)*@\\w+([.-]?\\w+)*(\\.\\w{2,3})+$",
+            "example": "jacob@gmail.com"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6,
+            "example": "jac123"
+          }
+        }
+      },
+      "ChangeAvatar": {
+        "type": "object",
+        "required": ["avatar"],
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "UserRegistration": {
+        "type": "object",
+        "required": ["email, password"],
+        "properties": {
+          "user": {
+            "type": "object",
+            "description": "Positive status code",
+            "example": {
+              "email": "ap2l22e.vlad.taran@gmail.com",
+              "subscription": "starter"
+            }
+          }
+        }
+      },
+      "UserWithTokenSerializer": {
+        "type": "object",
+        "required": ["token"],
+        "properties": {
+          "token": {
+            "type": "string",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1N2YyZmQ2MjAyNGNkMzFjYTNhZDYzNyIsImlhdCI6MTcwMjgzNDMwMCwiZXhwIjoxNzAzNjYyMzAwfQ.Ch5pvle9Oon-r1eErOkd4J7qYY8yAcyhHyhdongUTy4"
+          },
+          "user": {
+            "type": "object",
+            "example": { "email": "apple@gmail.com", "subscription": "starter" }
+          }
+        }
+      },
+      "SignOutUser": {
+        "type": "object",
+        "required": ["message"],
+        "properties": {
+          "message": {
+            "type": "string",
+            "example": "Logout success"
+          }
+        }
+      },
+      "SendingUserData": {
+        "type": "object",
+        "required": ["email", "subscription"],
+        "properties": {
+          "message": {
+            "type": "object",
+            "example": {
+              "email": "apple@gmail.com",
+              "subscription": "starter"
+            }
+          }
+        }
+      },
+      "errorBadRequestResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Bad request"
+          }
+        }
+      },
+      "errorUnauthorizedResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Email or password is wrong"
+          }
+        }
+      },
+      "errorUserTokenExpiredResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Not authorized"
+          }
+        }
+      },
+      "errorNotfound": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "Not found"
+          }
+        }
+      },
+      "errorRemoveCategoryResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Error message",
+            "example": "User already exist"
+          }
+        }
+      },
+      "NewAvatar": {
+        "type": "object",
+        "required": ["updateAvatar"],
+        "properties": {
+          "avatar": {
+            "type": "string",
+            "example": "https://res.cloudinary.com/dz0edwubh/image/upload/v1703286739/avatars/pzuneox9ej9y4ckv9n7l.jpg"
+          }
+        }
+      },
+      "Contact": {
+        "type": "object",
+        "required": ["name", "email", "phone", "favorite"],
+        "properties": {
+          "name": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "phone": { "type": "string" },
+          "favorite": { "type": "boolean" }
+        }
+      },
+      "ContactFavorite": {
+        "type": "object",
+        "required": ["favorite"],
+        "properties": {
+          "favorite": { "type": "boolean" }
+        }
+      }
+    },
+    "errorSchemas": {
+      "errorBadRequestResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "description": "Error message" }
+        }
+      },
+      "errorUnauthorizedResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "description": "Error message" }
+        }
+      },
+      "errorUserTokenExpiredResponse": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "description": "Error message" }
+        }
+      },
+      "errorNotfound": {
+        "type": "object",
+        "properties": {
+          "message": { "type": "string", "description": "Error message" }
+        }
+      }
+    }
+  }
+}
