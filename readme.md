@@ -1,5 +1,5 @@
 
-# Contacts Book API
+# Contacts Book API 📔
 
 This is an API for a contacts book that allows managing contacts.
 
